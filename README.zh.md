@@ -2,9 +2,19 @@
 
 [English](README.md) · [한국어](README.ko.md) · [日本語](README.ja.md) · **中文**
 
+[![macOS](https://img.shields.io/badge/macOS-26%2B-0a0a0c?style=flat-square)](https://github.com/minhee0000/PromptMeter)
+[![Version](https://img.shields.io/badge/version-0.1.0-16d3b4?style=flat-square)](https://github.com/minhee0000/PromptMeter)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6e5aff?style=flat-square)](LICENSE)
+
 PromptMeter 是一款面向每天使用 AI 编码助手的开发者的 macOS 菜单栏应用。无需打开多个仪表盘或翻找 CLI 输出，就能时刻看到当前可用配额、重置时间和本地 token 用量。
 
 目前支持 Codex、Claude Code 和 Gemini CLI。
+
+## 截图
+
+<!-- TODO: 弹出窗口截图准备好后替换为 docs/screenshot.png。 -->
+
+_菜单栏弹出窗口截图 — 即将添加。_
 
 ## 为什么做这个
 
@@ -51,6 +61,20 @@ PromptMeter 以本地优先为设计原则：
 - 账户邮箱可在设置 UI 中隐藏。
 
 Claude Code 的 OAuth 凭证通过 macOS Keychain 读取，需要刷新 token 时会缓存到 PromptMeter 自己的 Keychain 项中。
+
+## macOS 权限
+
+PromptMeter 在 macOS 上保持安静 — 不需要 Screen Recording、Accessibility 或 Full Disk Access。
+
+- **Keychain（由 macOS 提示）** — 首次刷新时 PromptMeter 会读取 Claude Code CLI 存储的 Claude OAuth 凭证（`Claude Code-credentials` 项），并将一份可刷新的副本缓存到自己的 Keychain 项（`com.seo.promptMeter.oauth-cache`），让后台刷新不再触发提示。若想彻底去掉首次提示：
+  1. 打开 **Keychain Access.app** → login keychain。
+  2. 找到被提示的项（通常是 `Claude Code-credentials`）并打开它。
+  3. 在 **Access Control** 中将 `PromptMeter.app` 添加到 "Always allow access by these applications"。
+  4. 重启 PromptMeter。
+- **通知（可选）** — 仅在启用低配额提醒时请求。拒绝也不会影响其他功能。
+- **登录项（可选）** — 设置 → General → "Start at login" 使用 `SMAppService`，macOS 在把 PromptMeter 加入登录项之前只会询问一次。
+
+不会保存任何密码。Provider CLI 仍各自管理认证。
 
 ## 项目结构
 
@@ -112,3 +136,7 @@ open PromptMeter.xcodeproj
 - 更多 provider 集成。
 - 已签名的发布版本。
 - 用于支持的诊断信息导入 / 导出。
+
+## 许可证
+
+MIT © minhee0000. 详见 [LICENSE](LICENSE)。

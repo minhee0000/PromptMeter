@@ -2,9 +2,19 @@
 
 **English** · [한국어](README.ko.md) · [日本語](README.ja.md) · [中文](README.zh.md)
 
+[![macOS](https://img.shields.io/badge/macOS-26%2B-0a0a0c?style=flat-square)](https://github.com/minhee0000/PromptMeter)
+[![Version](https://img.shields.io/badge/version-0.1.0-16d3b4?style=flat-square)](https://github.com/minhee0000/PromptMeter)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6e5aff?style=flat-square)](LICENSE)
+
 PromptMeter is a macOS menu bar app for people who work with AI coding assistants every day. It keeps your active quota, reset windows, and local token usage visible without opening multiple dashboards or digging through CLI output.
 
 It currently focuses on Codex, Claude Code, and Gemini CLI.
+
+## Screenshot
+
+<!-- TODO: replace with docs/screenshot.png once the popover capture is ready. -->
+
+_Screenshot of the menu bar popover — coming soon._
 
 ## Why
 
@@ -51,6 +61,20 @@ PromptMeter is designed to be local-first:
 - Account emails can be hidden from the settings UI.
 
 Claude Code OAuth credentials are read through macOS Keychain and cached through PromptMeter's own Keychain item when token refresh is needed.
+
+## macOS Permissions
+
+PromptMeter stays quiet on macOS — no Screen Recording, no Accessibility, no Full Disk Access.
+
+- **Keychain (prompted by macOS)** — On first refresh, PromptMeter reads the Claude OAuth credential stored by the Claude Code CLI (`Claude Code-credentials` item) and caches a refreshable copy under its own Keychain item (`com.seo.promptMeter.oauth-cache`) so background refreshes do not prompt again. To remove the initial prompt entirely:
+  1. Open **Keychain Access.app** → login keychain.
+  2. Find the prompted item (usually `Claude Code-credentials`) and open it.
+  3. Under **Access Control**, add `PromptMeter.app` to "Always allow access by these applications".
+  4. Relaunch PromptMeter.
+- **Notifications (optional)** — Requested only when low-quota alerts are enabled. Declining keeps everything else working.
+- **Login items (opt-in)** — Settings → General → "Start at login" uses `SMAppService`; macOS asks once before adding PromptMeter to login items.
+
+No passwords are stored. Provider CLIs continue to manage their own authentication.
 
 ## Project Structure
 
@@ -112,3 +136,7 @@ If a CLI is missing, PromptMeter keeps it visible in Settings but does not show 
 - More provider integrations.
 - Signed release builds.
 - Import/export diagnostics for support.
+
+## License
+
+MIT © minhee0000. See [LICENSE](LICENSE) for details.
