@@ -1,5 +1,7 @@
 # PromptMeter
 
+**English** · [한국어](README.ko.md) · [日本語](README.ja.md) · [中文](README.zh.md)
+
 PromptMeter is a macOS menu bar app for people who work with AI coding assistants every day. It keeps your active quota, reset windows, and local token usage visible without opening multiple dashboards or digging through CLI output.
 
 It currently focuses on Codex, Claude Code, and Gemini CLI.
