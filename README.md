@@ -10,6 +10,8 @@ PromptMeter is a macOS menu bar app for people who work with AI coding assistant
 
 It currently focuses on Codex, Claude Code, and Gemini CLI.
 
+It is built to be small and quiet — no Dock icon, a single popover, incremental log scanning, and a tiny memory footprint.
+
 ## Screenshot
 
 <!-- TODO: replace with docs/screenshot.png once the popover capture is ready. -->
@@ -30,6 +32,8 @@ PromptMeter puts those answers in the menu bar and a compact popover, so you can
 
 ## Features
 
+- **Minimal design** — single popover, no Dock icon, no analytics or telemetry.
+- **Lightweight footprint** — small resident memory and low idle CPU; sleeps between user-configured refresh ticks.
 - **Menu bar status** for the lowest remaining provider sessions.
 - **Provider cards** for Codex, Claude Code, and Gemini CLI.
 - **Today usage** from local Codex and Claude Code JSONL logs.

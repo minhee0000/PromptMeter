@@ -10,6 +10,8 @@ PromptMeter는 매일 AI 코딩 어시스턴트와 함께 일하는 사람들을
 
 현재는 Codex, Claude Code, Gemini CLI를 지원합니다.
 
+작고 조용하게 동작하도록 설계되었습니다 — Dock 아이콘 없음, 단일 팝오버, 점진적 로그 스캔, 작은 메모리 풋프린트.
+
 ## 스크린샷
 
 <!-- TODO: 팝오버 캡처가 준비되면 docs/screenshot.png로 교체. -->
@@ -30,6 +32,8 @@ PromptMeter는 이런 답을 메뉴 바와 간단한 팝오버에 띄워서, 컨
 
 ## 기능
 
+- 단일 팝오버, Dock 아이콘 없음, 분석/텔레메트리 없는 **미니멀 디자인**.
+- 작은 메모리 상주량과 낮은 유휴 CPU, 사용자 설정 새로고침 주기 사이에는 대기하는 **가벼운 풋프린트**.
 - 가장 적게 남은 provider 세션을 보여주는 **메뉴 바 상태 표시**.
 - Codex, Claude Code, Gemini CLI별 **Provider 카드**.
 - 로컬 Codex/Claude Code JSONL 로그에서 집계한 **오늘 사용량**.
