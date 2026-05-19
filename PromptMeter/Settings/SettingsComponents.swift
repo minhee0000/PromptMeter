@@ -28,6 +28,7 @@ struct SettingsCard<Content: View>: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .stroke(SettingsPalette.panelStroke, lineWidth: 1)
         )
+        .environment(\.colorScheme, .dark)
     }
 }
 
@@ -78,7 +79,8 @@ struct SettingPickerRow: View {
                 }
             }
             .labelsHidden()
-            .frame(width: 112)
+            .frame(minWidth: 140, idealWidth: 160, maxWidth: 200, alignment: .trailing)
+            .fixedSize()
         }
     }
 }
