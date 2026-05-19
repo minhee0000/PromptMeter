@@ -820,6 +820,66 @@ enum L10nTables {
             .japanese: "週間",
             .simplifiedChinese: "每周",
         ],
+        .extraWindowSonnet: [
+            .english: "Sonnet",
+            .korean: "Sonnet",
+            .japanese: "Sonnet",
+            .simplifiedChinese: "Sonnet",
+        ],
+        .extraWindowOpus: [
+            .english: "Opus",
+            .korean: "Opus",
+            .japanese: "Opus",
+            .simplifiedChinese: "Opus",
+        ],
+        .extraWindowHaiku: [
+            .english: "Haiku",
+            .korean: "Haiku",
+            .japanese: "Haiku",
+            .simplifiedChinese: "Haiku",
+        ],
+        .extraWindowDesigns: [
+            .english: "Designs",
+            .korean: "디자인",
+            .japanese: "デザイン",
+            .simplifiedChinese: "设计",
+        ],
+        .extraWindowRoutines: [
+            .english: "Routines",
+            .korean: "루틴",
+            .japanese: "ルーチン",
+            .simplifiedChinese: "例程",
+        ],
+        .extraWindowPro: [
+            .english: "Pro",
+            .korean: "Pro",
+            .japanese: "Pro",
+            .simplifiedChinese: "Pro",
+        ],
+        .extraWindowFlash: [
+            .english: "Flash",
+            .korean: "Flash",
+            .japanese: "Flash",
+            .simplifiedChinese: "Flash",
+        ],
+        .extraWindowDaily: [
+            .english: "Daily",
+            .korean: "일일",
+            .japanese: "日次",
+            .simplifiedChinese: "每日",
+        ],
+        .extraWindowQuota: [
+            .english: "Quota",
+            .korean: "할당량",
+            .japanese: "クオータ",
+            .simplifiedChinese: "配额",
+        ],
+        .extraWindowQuotaIndexedFormat: [
+            .english: "Quota %d",
+            .korean: "할당량 %d",
+            .japanese: "クオータ %d",
+            .simplifiedChinese: "配额 %d",
+        ],
     ]
 
     // MARK: - Language picker labels (shown in their own script)

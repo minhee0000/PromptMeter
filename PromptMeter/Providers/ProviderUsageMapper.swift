@@ -116,6 +116,41 @@ enum ProviderUsageMapper {
         )
     }
 
+    /// Maps raw window titles supplied by provider clients (Claude OAuth
+    /// categories, Gemini /stats parser, fallback session/weekly literals)
+    /// to localized labels. Unknown values pass through unchanged so model
+    /// names and arbitrary server-supplied strings still render verbatim.
+    private static func localizedExtraWindowTitle(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        switch trimmed.lowercased() {
+        case "session": return L10n.tr(.quotaWindowSession)
+        case "weekly": return L10n.tr(.quotaWindowWeekly)
+        case "sonnet": return L10n.tr(.extraWindowSonnet)
+        case "opus": return L10n.tr(.extraWindowOpus)
+        case "haiku": return L10n.tr(.extraWindowHaiku)
+        case "designs": return L10n.tr(.extraWindowDesigns)
+        case "routines": return L10n.tr(.extraWindowRoutines)
+        case "pro": return L10n.tr(.extraWindowPro)
+        case "flash": return L10n.tr(.extraWindowFlash)
+        case "daily": return L10n.tr(.extraWindowDaily)
+        case "quota": return L10n.tr(.extraWindowQuota)
+        default:
+            if let index = quotaIndex(in: trimmed) {
+                return L10n.format(.extraWindowQuotaIndexedFormat, index)
+            }
+            return trimmed
+        }
+    }
+
+    private static func quotaIndex(in title: String) -> Int? {
+        let prefix = "Quota "
+        guard title.hasPrefix(prefix),
+              let value = Int(title.dropFirst(prefix.count)) else {
+            return nil
+        }
+        return value
+    }
+
     static func menuProviders(
         codex: CodexProviderState,
         claude: ClaudeCodeProviderState,
@@ -173,10 +208,10 @@ enum ProviderUsageMapper {
                 provider: .gemini,
                 plan: snapshot.planName,
                 detail: snapshot.hasRateLimits ? nil : L10n.tr(.providerGeminiNoQuotaPercentages),
-                primary: geminiMetric(title: snapshot.primaryTitle, window: snapshot.primary, usageBasis: usageBasis, resetStyle: resetStyle),
-                secondary: geminiMetric(title: snapshot.secondaryTitle, window: snapshot.secondary, usageBasis: usageBasis, resetStyle: resetStyle),
+                primary: geminiMetric(title: localizedExtraWindowTitle(snapshot.primaryTitle), window: snapshot.primary, usageBasis: usageBasis, resetStyle: resetStyle),
+                secondary: geminiMetric(title: localizedExtraWindowTitle(snapshot.secondaryTitle), window: snapshot.secondary, usageBasis: usageBasis, resetStyle: resetStyle),
                 extraMetrics: snapshot.extraWindows.map {
-                    geminiMetric(title: $0.title, window: $0.window, usageBasis: usageBasis, resetStyle: resetStyle)
+                    geminiMetric(title: localizedExtraWindowTitle($0.title), window: $0.window, usageBasis: usageBasis, resetStyle: resetStyle)
                 }
             )
         case .missingCLI:
@@ -207,7 +242,7 @@ enum ProviderUsageMapper {
                 primary: claudeMetric(title: ProviderQuotaWindowKind.session.localizedTitle, window: snapshot.session, usageBasis: usageBasis, resetStyle: resetStyle),
                 secondary: claudeMetric(title: ProviderQuotaWindowKind.weekly.localizedTitle, window: snapshot.weekly, usageBasis: usageBasis, resetStyle: resetStyle),
                 extraMetrics: snapshot.extraWindows.map {
-                    claudeMetric(title: $0.title, window: $0.window, usageBasis: usageBasis, resetStyle: resetStyle)
+                    claudeMetric(title: localizedExtraWindowTitle($0.title), window: $0.window, usageBasis: usageBasis, resetStyle: resetStyle)
                 }
             )
         case .missingCLI:

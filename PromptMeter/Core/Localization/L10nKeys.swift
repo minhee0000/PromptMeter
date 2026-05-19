@@ -75,6 +75,18 @@ enum L10nKey: String, CaseIterable, Sendable {
     case quotaWindowSession
     case quotaWindowWeekly
 
+    // Provider extra windows (Claude OAuth + Gemini stats categories)
+    case extraWindowSonnet
+    case extraWindowOpus
+    case extraWindowHaiku
+    case extraWindowDesigns
+    case extraWindowRoutines
+    case extraWindowPro
+    case extraWindowFlash
+    case extraWindowDaily
+    case extraWindowQuota
+    case extraWindowQuotaIndexedFormat
+
     // Notifications
     case notificationQuotaLowSingleTitleFormat
     case notificationQuotaLowSingleBodyFormat
