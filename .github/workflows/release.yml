@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Import signing certificate
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          CERTIFICATE_PATH="$RUNNER_TEMP/build_certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+      - name: Build, sign, notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          chmod +x Scripts/release.sh
+          ./Scripts/release.sh "${{ steps.version.outputs.version }}"
+
+      - name: Capture SHA256
+        id: hash
+        run: |
+          ZIP="build/PromptMeter-${{ steps.version.outputs.version }}.zip"
+          SHA=$(shasum -a 256 "$ZIP" | awk '{print $1}')
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          ZIP="build/PromptMeter-${VERSION}.zip"
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release upload "v$VERSION" "$ZIP" --clobber
+          else
+            gh release create "v$VERSION" "$ZIP" \
+              --title "v$VERSION" \
+              --generate-notes
+          fi
+
+      - name: Update homebrew-tap (optional)
+        env:
+          TAP_REPO_TOKEN: ${{ secrets.TAP_REPO_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA: ${{ steps.hash.outputs.sha256 }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${TAP_REPO_TOKEN:-}" ]]; then
+            echo "TAP_REPO_TOKEN not set — skipping homebrew-tap update."
+            exit 0
+          fi
+
+          git clone "https://x-access-token:${TAP_REPO_TOKEN}@github.com/${OWNER}/homebrew-tap.git" tap
+          cd tap
+          mkdir -p Casks
+          cat > Casks/promptmeter.rb <<RUBY
+          cask "promptmeter" do
+            version "${VERSION}"
+            sha256 "${SHA}"
+
+            url "https://github.com/${REPO}/releases/download/v#{version}/PromptMeter-#{version}.zip"
+            name "PromptMeter"
+            desc "Menu bar meter for AI coding assistant quota and local token usage"
+            homepage "https://github.com/${REPO}"
+
+            depends_on macos: ">= :tahoe"
+            auto_updates false
+
+            app "PromptMeter.app"
+
+            zap trash: [
+              "~/Library/Preferences/com.seo.promptMeter.plist",
+              "~/Library/Caches/PromptMeter",
+              "~/Library/Saved Application State/com.seo.promptMeter.savedState",
+            ]
+          end
+          RUBY
+
+          git config user.name "PromptMeter Release Bot"
+          git config user.email "noreply@github.com"
+          git add Casks/promptmeter.rb
+          if git diff --cached --quiet; then
+            echo "No changes to homebrew-tap — already up to date."
+          else
+            git commit -m "Bump promptmeter to ${VERSION}"
+            git push
+          fi
