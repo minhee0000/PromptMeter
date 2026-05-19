@@ -130,7 +130,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, UNU
             display = StatusDisplay(
                 imageKey: "system.text.bubble",
                 entries: [],
-                tooltip: "PromptMeter - \(model.metrics.estimatedTokens) estimated tokens"
+                tooltip: L10n.format(.tooltipBaseEstimatedTokensFormat, String(model.metrics.estimatedTokens))
             )
         }
 
@@ -150,9 +150,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate, UNU
 
     private func statusTooltip(for statuses: [MenuBarSessionStatus]) -> String {
         let usageText = statuses
-            .map { "\($0.providerName) session \($0.percentText) left" }
+            .map { L10n.format(.tooltipUsageProviderSessionLeftFormat, $0.providerName, $0.percentText) }
             .joined(separator: " · ")
-        return "PromptMeter - \(model.metrics.estimatedTokens) estimated tokens · \(usageText)"
+        return L10n.format(
+            .tooltipBaseWithUsageFormat,
+            String(model.metrics.estimatedTokens),
+            usageText
+        )
     }
 
     private func statusImage(for display: StatusDisplay) -> NSImage? {

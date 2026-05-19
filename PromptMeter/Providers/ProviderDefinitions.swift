@@ -85,12 +85,24 @@ enum ProviderQuotaWindowKind: Sendable {
         }
     }
 
+    /// Raw English title kept stable for code paths that run off the main actor
+    /// (provider clients) and for backward-compatible fallback matching.
     nonisolated var title: String {
         switch self {
         case .session:
             return "Session"
         case .weekly:
             return "Weekly"
+        }
+    }
+
+    @MainActor
+    var localizedTitle: String {
+        switch self {
+        case .session:
+            return L10n.tr(.quotaWindowSession)
+        case .weekly:
+            return L10n.tr(.quotaWindowWeekly)
         }
     }
 
@@ -103,15 +115,18 @@ enum ProviderQuotaWindowKind: Sendable {
         }
     }
 
-    init?(title: String) {
-        switch title.lowercased() {
-        case Self.session.title.lowercased():
-            self = .session
-        case Self.weekly.title.lowercased():
-            self = .weekly
-        default:
-            return nil
+    /// Maps a display title (raw English or any localized form) back to a kind so
+    /// that pace-marker calculations can find the default window duration.
+    @MainActor
+    init?(displayTitle: String) {
+        let lowered = displayTitle.lowercased()
+        for kind in [ProviderQuotaWindowKind.session, .weekly] {
+            if kind.title.lowercased() == lowered || kind.localizedTitle.lowercased() == lowered {
+                self = kind
+                return
+            }
         }
+        return nil
     }
 }
 

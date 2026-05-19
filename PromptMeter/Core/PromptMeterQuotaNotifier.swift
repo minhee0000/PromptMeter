@@ -24,7 +24,8 @@ struct QuotaWarning: Sendable {
 enum PromptMeterQuotaNotifier {
     private nonisolated static let authorizationOptions: UNAuthorizationOptions = [.alert, .sound]
 
-    nonisolated static func postLowQuota(_ warnings: [QuotaWarning]) {
+    @MainActor
+    static func postLowQuota(_ warnings: [QuotaWarning]) {
         guard !warnings.isEmpty else { return }
 
         let payload = notificationPayload(for: warnings)
@@ -35,32 +36,57 @@ enum PromptMeterQuotaNotifier {
         )
     }
 
-    nonisolated private static func notificationPayload(
+    @MainActor
+    private static func notificationPayload(
         for warnings: [QuotaWarning]
     ) -> (identifier: String, title: String, body: String) {
         if warnings.count == 1, let warning = warnings.first {
             return (
                 identifier: warning.key.notificationIdentifier,
-                title: "\(warning.providerName) \(warning.windowTitle.lowercased()) quota low",
-                body: "\(warning.windowTitle) remaining is \(warning.roundedPercent)%."
+                title: L10n.format(
+                    .notificationQuotaLowSingleTitleFormat,
+                    warning.providerName,
+                    warning.windowTitle
+                ),
+                body: L10n.format(
+                    .notificationQuotaLowSingleBodyFormat,
+                    warning.windowTitle,
+                    warning.roundedPercent
+                )
             )
         }
 
         let singleProviderName = commonProviderName(in: warnings)
         let summary = warnings
-            .map { warning in
+            .map { warning -> String in
                 if singleProviderName != nil {
-                    return "\(warning.windowTitle) \(warning.roundedPercent)%"
+                    return L10n.format(
+                        .notificationQuotaLowSummaryNoProviderFormat,
+                        warning.windowTitle,
+                        warning.roundedPercent
+                    )
                 }
 
-                return "\(warning.providerName) \(warning.windowTitle) \(warning.roundedPercent)%"
+                return L10n.format(
+                    .notificationQuotaLowSummaryWithProviderFormat,
+                    warning.providerName,
+                    warning.windowTitle,
+                    warning.roundedPercent
+                )
             }
             .joined(separator: " · ")
 
+        let title: String
+        if let providerName = singleProviderName {
+            title = L10n.format(.notificationQuotaLowMultiTitleProviderFormat, providerName)
+        } else {
+            title = L10n.tr(.notificationQuotaLowMultiTitleGeneric)
+        }
+
         return (
             identifier: "promptmeter.quota.low",
-            title: singleProviderName.map { "\($0) quota low" } ?? "Provider quota low",
-            body: "\(summary) remaining."
+            title: title,
+            body: L10n.format(.notificationQuotaLowMultiBodyFormat, summary)
         )
     }
 

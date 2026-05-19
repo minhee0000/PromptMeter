@@ -66,18 +66,18 @@ struct PromptMeterSettingsView: View {
                 )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("PromptMeter")
+                Text(verbatim: "PromptMeter")
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(SettingsPalette.primaryText)
 
-                Text("Settings")
+                Text(.settingsHeaderSubtitle)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(SettingsPalette.secondaryText)
             }
 
             Spacer()
 
-            Text(state.selectedTab.rawValue)
+            Text(verbatim: state.selectedTab.displayName)
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(SettingsPalette.secondaryText)
         }
@@ -131,7 +131,7 @@ struct SettingsTabButton: View {
             HStack(spacing: 5) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 12, weight: .medium))
-                Text(tab.rawValue)
+                Text(verbatim: tab.displayName)
                     .font(.system(size: 11, weight: .semibold))
             }
             .foregroundStyle(isSelected ? SettingsPalette.primaryText : SettingsPalette.secondaryText)

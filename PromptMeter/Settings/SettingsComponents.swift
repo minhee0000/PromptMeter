@@ -159,7 +159,7 @@ struct CommonProviderSettingsCard: View {
 
             Spacer()
 
-            Button(isRefreshing ? "Refreshing" : "Refresh") {
+            Button(isRefreshing ? L10n.tr(.menuFooterRefreshing) : L10n.tr(.menuFooterRefresh)) {
                 refreshAction()
             }
             .buttonStyle(.bordered)
@@ -239,12 +239,12 @@ private struct ProviderCommandRow: View {
     @ViewBuilder
     private var copyButton: some View {
         if prominent {
-            Button("Copy") {
+            Button(L10n.tr(.providerCopyButton)) {
                 action.copyCommandAction()
             }
             .buttonStyle(.borderedProminent)
         } else {
-            Button("Copy") {
+            Button(L10n.tr(.providerCopyButton)) {
                 action.copyCommandAction()
             }
             .buttonStyle(.bordered)

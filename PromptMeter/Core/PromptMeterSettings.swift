@@ -21,6 +21,25 @@ enum PromptMeterRefreshCadence: String, CaseIterable, Identifiable {
             return 900
         }
     }
+
+    @MainActor
+    var displayName: String {
+        switch self {
+        case .thirtySeconds:
+            return L10n.tr(.cadenceThirtySeconds)
+        case .oneMinute:
+            return L10n.tr(.cadenceOneMinute)
+        case .fiveMinutes:
+            return L10n.tr(.cadenceFiveMinutes)
+        case .fifteenMinutes:
+            return L10n.tr(.cadenceFifteenMinutes)
+        }
+    }
+
+    @MainActor
+    static func from(displayName: String) -> PromptMeterRefreshCadence? {
+        allCases.first { $0.displayName == displayName }
+    }
 }
 
 enum PromptMeterUsageBasis: String, CaseIterable, Identifiable {
@@ -28,6 +47,21 @@ enum PromptMeterUsageBasis: String, CaseIterable, Identifiable {
     case used = "Used"
 
     var id: String { rawValue }
+
+    @MainActor
+    var displayName: String {
+        switch self {
+        case .remaining:
+            return L10n.tr(.usageBasisRemaining)
+        case .used:
+            return L10n.tr(.usageBasisUsed)
+        }
+    }
+
+    @MainActor
+    static func from(displayName: String) -> PromptMeterUsageBasis? {
+        allCases.first { $0.displayName == displayName }
+    }
 }
 
 enum PromptMeterResetStyle: String, CaseIterable, Identifiable {
@@ -35,6 +69,33 @@ enum PromptMeterResetStyle: String, CaseIterable, Identifiable {
     case countdown = "Countdown"
 
     var id: String { rawValue }
+
+    @MainActor
+    var displayName: String {
+        switch self {
+        case .clock:
+            return L10n.tr(.resetStyleClock)
+        case .countdown:
+            return L10n.tr(.resetStyleCountdown)
+        }
+    }
+
+    @MainActor
+    static func from(displayName: String) -> PromptMeterResetStyle? {
+        allCases.first { $0.displayName == displayName }
+    }
+}
+
+extension PromptMeterLanguage {
+    @MainActor
+    var displayName: String {
+        nativeDisplayName
+    }
+
+    @MainActor
+    static func from(displayName: String) -> PromptMeterLanguage? {
+        allCases.first { $0.displayName == displayName }
+    }
 }
 
 enum LaunchAtLoginController {

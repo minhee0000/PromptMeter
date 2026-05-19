@@ -8,7 +8,7 @@ struct MenuTodayUsageCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Text("Today usage")
+                Text(.menuTodayUsage)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(MenuPalette.panelSecondaryText)
                     .textCase(.uppercase)
@@ -134,11 +134,11 @@ private struct MenuEmptyTodayUsageRow: View {
                 .frame(width: 17)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("No token usage today")
+                Text(.menuTodayUsageEmptyTitle)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(MenuPalette.panelPrimaryText)
 
-                Text("Local session logs are empty")
+                Text(.menuTodayUsageEmptySubtitle)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(MenuPalette.panelSecondaryText)
             }
@@ -429,19 +429,19 @@ struct MenuFooterActions: View {
         VStack(spacing: 4) {
             MenuFooterButton(
                 icon: "arrow.clockwise",
-                title: model.isRefreshingProviders ? "Refreshing" : "Refresh",
+                title: model.isRefreshingProviders ? L10n.tr(.menuFooterRefreshing) : L10n.tr(.menuFooterRefresh),
                 shortcut: "⌘R",
                 isDisabled: model.isRefreshingProviders
             ) {
                 model.refreshProviders()
             }
-            MenuFooterButton(icon: "gearshape", title: "Settings", shortcut: "⌘,") {
+            MenuFooterButton(icon: "gearshape", title: L10n.tr(.menuFooterSettings), shortcut: "⌘,") {
                 PromptMeterSettingsWindow.shared.show(model: model)
             }
-            MenuFooterButton(icon: "info.circle", title: "About", shortcut: nil) {
+            MenuFooterButton(icon: "info.circle", title: L10n.tr(.menuFooterAbout), shortcut: nil) {
                 PromptMeterSettingsWindow.shared.show(model: model, selectedTab: .about)
             }
-            MenuFooterButton(icon: "power", title: "Quit", shortcut: "⌘Q") {
+            MenuFooterButton(icon: "power", title: L10n.tr(.menuFooterQuit), shortcut: "⌘Q") {
                 NSApplication.shared.terminate(nil)
             }
         }

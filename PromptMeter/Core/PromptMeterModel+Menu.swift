@@ -15,7 +15,7 @@ extension PromptMeterModel {
                 provider: provider,
                 systemIcon: nil,
                 title: provider.displayName,
-                value: "\(Self.compactTokenText(snapshot.totalTokens)) tokens",
+                value: L10n.format(.menuTodayUsageTokensFormat, Self.compactTokenText(snapshot.totalTokens)),
                 metrics: todayUsageMetrics(snapshot),
                 progress: nil
             )
@@ -76,17 +76,17 @@ extension PromptMeterModel {
 
     private func todayUsageMetrics(_ snapshot: LocalTokenUsageSnapshot) -> [MenuTodayUsageMetric] {
         var metrics = [
-            MenuTodayUsageMetric(label: "In", value: Self.compactTokenText(snapshot.inputTokens)),
-            MenuTodayUsageMetric(label: "Out", value: Self.compactTokenText(snapshot.outputTokens))
+            MenuTodayUsageMetric(label: L10n.tr(.menuTodayUsageIn), value: Self.compactTokenText(snapshot.inputTokens)),
+            MenuTodayUsageMetric(label: L10n.tr(.menuTodayUsageOut), value: Self.compactTokenText(snapshot.outputTokens))
         ]
 
         if snapshot.cacheTokens > 0 {
-            metrics.append(MenuTodayUsageMetric(label: "Cache", value: Self.compactTokenText(snapshot.cacheTokens)))
+            metrics.append(MenuTodayUsageMetric(label: L10n.tr(.menuTodayUsageCache), value: Self.compactTokenText(snapshot.cacheTokens)))
         }
 
         if let estimatedCostAmount = snapshot.estimatedCostAmount,
            let estimatedCostUnit = snapshot.estimatedCostUnit {
-            metrics.append(MenuTodayUsageMetric(label: "Est.", value: Self.compactCostText(estimatedCostAmount, unit: estimatedCostUnit)))
+            metrics.append(MenuTodayUsageMetric(label: L10n.tr(.menuTodayUsageEstimated), value: Self.compactCostText(estimatedCostAmount, unit: estimatedCostUnit)))
         }
 
         return metrics

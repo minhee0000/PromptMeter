@@ -67,6 +67,15 @@ final class PromptMeterModel: ObservableObject {
         }
     }
 
+    var language: PromptMeterLanguage {
+        get { LocalizationManager.shared.language }
+        set {
+            guard LocalizationManager.shared.language != newValue else { return }
+            objectWillChange.send()
+            LocalizationManager.shared.setLanguage(newValue)
+        }
+    }
+
     private static let promptKey = "PromptMeter.prompt"
     private static let contextLimitKey = "PromptMeter.contextLimit"
     private static let launchAtLoginKey = "PromptMeter.launchAtLogin"
@@ -153,23 +162,23 @@ final class PromptMeterModel: ObservableObject {
 
     var providerRefreshLabel: String {
         if isRefreshingProviders {
-            return "Syncing"
+            return L10n.tr(.statusSyncing)
         }
 
         if isProviderChecking {
-            return "Checking"
+            return L10n.tr(.statusChecking)
         }
         if hasConnectedProvider {
-            return "Now"
+            return L10n.tr(.statusNow)
         }
         if needsProviderLogin {
-            return "Login"
+            return L10n.tr(.statusLogin)
         }
         if hasMissingProviderCLI {
-            return "Setup"
+            return L10n.tr(.statusSetup)
         }
 
-        return "Offline"
+        return L10n.tr(.statusOffline)
     }
 
     private var isProviderChecking: Bool {
@@ -205,33 +214,31 @@ final class PromptMeterModel: ObservableObject {
 
         switch claudeState {
         case .checking:
-            return "Checking \(providerName)"
+            return L10n.format(.providerCheckingTitleFormat, providerName)
         case .connected(let snapshot):
-            return "\(snapshot.subscriptionName) connected"
+            return L10n.format(.providerConnectedTitleFormat, snapshot.subscriptionName)
         case .missingCLI:
-            return "\(providerName) CLI not installed"
+            return L10n.format(.providerMissingCLITitleFormat, providerName)
         case .needsLogin:
-            return "\(providerName) login required"
+            return L10n.format(.providerNeedsLoginTitleFormat, providerName)
         case .unavailable:
-            return "\(providerName) unavailable"
+            return L10n.format(.providerUnavailableTitleFormat, providerName)
         }
     }
 
     var claudeSettingsDetail: String {
-        let providerName = ProviderIconKind.claude.displayName
-
         switch claudeState {
         case .checking:
-            return "PromptMeter is checking the local \(providerName) CLI."
+            return L10n.tr(.providerCheckingDetailClaude)
         case .connected(let snapshot):
             if let email = snapshot.accountEmail, !email.isEmpty, !hidePersonalInformation {
-                return "Reading \(providerName) usage through the OAuth API for \(email)."
+                return L10n.format(.providerClaudeConnectedDetailWithEmailFormat, email)
             }
-            return "Reading \(providerName) usage through the OAuth API."
+            return L10n.tr(.providerClaudeConnectedDetailNoEmail)
         case .missingCLI:
-            return "Install \(providerName) and sign in before refreshing usage."
+            return L10n.tr(.providerMissingCLIDetailClaude)
         case .needsLogin:
-            return "Run \(ProviderIconKind.claude.loginCommand) in Terminal, then refresh PromptMeter."
+            return L10n.format(.providerNeedsLoginDetailGenericFormat, ProviderIconKind.claude.loginCommand)
         case .unavailable(let message):
             return message
         }
@@ -239,14 +246,21 @@ final class PromptMeterModel: ObservableObject {
 
     var providerRefreshScheduleText: String {
         guard let lastProviderRefresh else {
-            return "Not refreshed yet"
+            return L10n.tr(.refreshScheduleNotRefreshedYet)
         }
 
         if let nextProviderRefresh {
-            return "Last \(Self.shortTimeFormatter.string(from: lastProviderRefresh)) · Next \(Self.shortTimeFormatter.string(from: nextProviderRefresh))"
+            return L10n.format(
+                .refreshScheduleLastAndNextFormat,
+                Self.shortTimeFormatter.string(from: lastProviderRefresh),
+                Self.shortTimeFormatter.string(from: nextProviderRefresh)
+            )
         }
 
-        return "Last \(Self.shortTimeFormatter.string(from: lastProviderRefresh))"
+        return L10n.format(
+            .refreshScheduleLastOnlyFormat,
+            Self.shortTimeFormatter.string(from: lastProviderRefresh)
+        )
     }
 
     var codexSettingsTitle: String {
@@ -254,33 +268,31 @@ final class PromptMeterModel: ObservableObject {
 
         switch codexState {
         case .checking:
-            return "Checking \(providerName) CLI"
+            return L10n.format(.providerCheckingCLITitleFormat, providerName)
         case .connected(let snapshot):
-            return "\(snapshot.planName) connected"
+            return L10n.format(.providerConnectedTitleFormat, snapshot.planName)
         case .missingCLI:
-            return "\(providerName) CLI not installed"
+            return L10n.format(.providerMissingCLITitleFormat, providerName)
         case .needsLogin:
-            return "\(providerName) login required"
+            return L10n.format(.providerNeedsLoginTitleFormat, providerName)
         case .unavailable:
-            return "\(providerName) unavailable"
+            return L10n.format(.providerUnavailableTitleFormat, providerName)
         }
     }
 
     var codexSettingsDetail: String {
-        let providerName = ProviderIconKind.codex.displayName
-
         switch codexState {
         case .checking:
-            return "PromptMeter is checking the local \(providerName) app-server."
+            return L10n.tr(.providerCheckingDetailCodex)
         case .connected(let snapshot):
             if let email = snapshot.accountEmail, !email.isEmpty, !hidePersonalInformation {
-                return "Reading live quota for \(email)."
+                return L10n.format(.providerCodexConnectedDetailWithEmailFormat, email)
             }
-            return "Reading live quota through the local \(providerName) CLI."
+            return L10n.tr(.providerCodexConnectedDetailNoEmail)
         case .missingCLI:
-            return "Install \(providerName) CLI and sign in before refreshing usage."
+            return L10n.tr(.providerMissingCLIDetailCodex)
         case .needsLogin:
-            return "Run \(ProviderIconKind.codex.loginCommand) in Terminal, then refresh PromptMeter."
+            return L10n.format(.providerNeedsLoginDetailGenericFormat, ProviderIconKind.codex.loginCommand)
         case .unavailable(let message):
             return message
         }
@@ -291,30 +303,28 @@ final class PromptMeterModel: ObservableObject {
 
         switch geminiState {
         case .checking:
-            return "Checking \(providerName)"
+            return L10n.format(.providerCheckingTitleFormat, providerName)
         case .connected(let snapshot):
-            return "\(snapshot.planName) connected"
+            return L10n.format(.providerConnectedTitleFormat, snapshot.planName)
         case .missingCLI:
-            return "\(providerName) not installed"
+            return L10n.format(.providerMissingTitleFormat, providerName)
         case .needsLogin:
-            return "\(providerName) login required"
+            return L10n.format(.providerNeedsLoginTitleFormat, providerName)
         case .unavailable:
-            return "\(providerName) unavailable"
+            return L10n.format(.providerUnavailableTitleFormat, providerName)
         }
     }
 
     var geminiSettingsDetail: String {
-        let providerName = ProviderIconKind.gemini.displayName
-
         switch geminiState {
         case .checking:
-            return "PromptMeter is checking the local \(providerName)."
+            return L10n.tr(.providerCheckingDetailGemini)
         case .connected(let snapshot):
-            return "Reading quota through \(snapshot.usageSource)."
+            return L10n.format(.providerGeminiConnectedDetailFormat, snapshot.usageSource)
         case .missingCLI:
-            return "Install \(providerName) and sign in before refreshing usage."
+            return L10n.tr(.providerMissingCLIDetailGemini)
         case .needsLogin:
-            return "Run \(ProviderIconKind.gemini.loginCommand) in Terminal and sign in with Google."
+            return L10n.tr(.providerNeedsLoginDetailGemini)
         case .unavailable(let message):
             return message
         }
@@ -349,10 +359,11 @@ final class PromptMeterModel: ObservableObject {
             return []
         }
 
+        let dash = L10n.tr(.commonDash)
         return [
-            SettingsInfoRowData(title: "CLI", value: snapshot.cliPath),
-            SettingsInfoRowData(title: "Raw plan", value: snapshot.rawPlanName ?? "--"),
-            SettingsInfoRowData(title: "Limit", value: snapshot.limitId ?? "--")
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugCLI), value: snapshot.cliPath),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugRawPlan), value: snapshot.rawPlanName ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugLimit), value: snapshot.limitId ?? dash)
         ]
     }
 
@@ -361,16 +372,17 @@ final class PromptMeterModel: ObservableObject {
             return []
         }
 
+        let dash = L10n.tr(.commonDash)
         return [
-            SettingsInfoRowData(title: "CLI", value: snapshot.cliPath),
-            SettingsInfoRowData(title: "Version", value: snapshot.version ?? "--"),
-            SettingsInfoRowData(title: "Raw plan", value: snapshot.rawSubscriptionName ?? "--"),
-            SettingsInfoRowData(title: "Auth", value: snapshot.authMethod ?? "--"),
-            SettingsInfoRowData(title: "Provider", value: snapshot.apiProvider ?? "--"),
-            SettingsInfoRowData(title: "Usage source", value: snapshot.usageSource),
-            SettingsInfoRowData(title: "Credential", value: snapshot.oauthCredentialSource),
-            SettingsInfoRowData(title: "Rate tier", value: snapshot.oauthRateLimitTier ?? "--"),
-            SettingsInfoRowData(title: "Token expiry", value: tokenExpiryText(snapshot.oauthExpiresAt))
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugCLI), value: snapshot.cliPath),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugVersion), value: snapshot.version ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugRawPlan), value: snapshot.rawSubscriptionName ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugAuth), value: snapshot.authMethod ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugProvider), value: snapshot.apiProvider ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugUsageSource), value: snapshot.usageSource),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugCredential), value: snapshot.oauthCredentialSource),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugRateTier), value: snapshot.oauthRateLimitTier ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugTokenExpiry), value: tokenExpiryText(snapshot.oauthExpiresAt))
         ]
     }
 
@@ -379,11 +391,12 @@ final class PromptMeterModel: ObservableObject {
             return []
         }
 
+        let dash = L10n.tr(.commonDash)
         return [
-            SettingsInfoRowData(title: "CLI", value: snapshot.cliPath),
-            SettingsInfoRowData(title: "Version", value: snapshot.version ?? "--"),
-            SettingsInfoRowData(title: "Raw plan", value: snapshot.rawPlanName ?? "--"),
-            SettingsInfoRowData(title: "Usage source", value: snapshot.usageSource)
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugCLI), value: snapshot.cliPath),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugVersion), value: snapshot.version ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugRawPlan), value: snapshot.rawPlanName ?? dash),
+            SettingsInfoRowData(title: L10n.tr(.settingsProvidersDebugUsageSource), value: snapshot.usageSource)
         ]
     }
 
@@ -595,7 +608,7 @@ final class PromptMeterModel: ObservableObject {
         _ kind: ProviderQuotaWindowKind,
         remainingPercent: Double?
     ) -> (id: String, title: String, remainingPercent: Double?) {
-        (id: kind.id, title: kind.title, remainingPercent: remainingPercent)
+        (id: kind.id, title: kind.localizedTitle, remainingPercent: remainingPercent)
     }
 
     private func quotaWarning(
@@ -698,24 +711,24 @@ final class PromptMeterModel: ObservableObject {
     }
 
     private func tokenExpiryText(_ date: Date?) -> String {
-        guard let date else { return "--" }
+        guard let date else { return L10n.tr(.commonDash) }
 
         let seconds = max(0, Int(date.timeIntervalSinceNow))
         if seconds < 60 {
-            return "Now"
+            return L10n.tr(.tokenExpiryNow)
         }
 
         let minutes = seconds / 60
         if minutes < 60 {
-            return "\(minutes)m"
+            return L10n.format(.unitMinuteShortFormat, minutes)
         }
 
         let hours = minutes / 60
         if hours < 24 {
-            return "\(hours)h"
+            return L10n.format(.unitHourShortFormat, hours)
         }
 
-        return "\(hours / 24)d"
+        return L10n.format(.unitDayShortFormat, hours / 24)
     }
 
     private static let shortTimeFormatter: DateFormatter = {

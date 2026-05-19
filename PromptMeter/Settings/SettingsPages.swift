@@ -6,39 +6,48 @@ struct GeneralSettingsPage: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            SettingsCard(title: "App") {
+            SettingsCard(title: L10n.tr(.settingsGeneralAppCard)) {
                 SettingToggleRow(
-                    title: "Start at login",
-                    detail: "Open PromptMeter quietly in the menu bar.",
+                    title: L10n.tr(.settingsGeneralStartAtLoginTitle),
+                    detail: L10n.tr(.settingsGeneralStartAtLoginDetail),
                     isOn: $model.launchAtLogin
                 )
 
                 SettingDivider()
 
                 SettingPickerRow(
-                    title: "Refresh cadence",
-                    detail: "Background provider usage refresh interval.",
+                    title: L10n.tr(.settingsGeneralRefreshCadenceTitle),
+                    detail: L10n.tr(.settingsGeneralRefreshCadenceDetail),
                     selection: refreshCadenceSelection,
-                    options: PromptMeterRefreshCadence.allCases.map(\.rawValue)
+                    options: PromptMeterRefreshCadence.allCases.map(\.displayName)
+                )
+
+                SettingDivider()
+
+                SettingPickerRow(
+                    title: L10n.tr(.settingsGeneralLanguageTitle),
+                    detail: L10n.tr(.settingsGeneralLanguageDetail),
+                    selection: languageSelection,
+                    options: PromptMeterLanguage.allCases.map(\.displayName)
                 )
             }
 
-            SettingsCard(title: "Refresh") {
-                SettingInfoRow(title: "Schedule", value: model.providerRefreshScheduleText)
+            SettingsCard(title: L10n.tr(.settingsGeneralRefreshCard)) {
+                SettingInfoRow(title: L10n.tr(.settingsGeneralRefreshScheduleTitle), value: model.providerRefreshScheduleText)
 
                 SettingDivider()
 
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Refresh now")
+                        Text(.settingsGeneralRefreshNowTitle)
                             .settingTitle()
-                        Text("Pull the latest provider quota from local CLIs.")
+                        Text(.settingsGeneralRefreshNowDetail)
                             .settingDetail()
                     }
 
                     Spacer()
 
-                    Button(model.isRefreshingProviders ? "Refreshing" : "Refresh") {
+                    Button(model.isRefreshingProviders ? L10n.tr(.settingsGeneralRefreshingButton) : L10n.tr(.settingsGeneralRefreshNowButton)) {
                         model.refreshProviders()
                     }
                     .buttonStyle(.bordered)
@@ -50,10 +59,21 @@ struct GeneralSettingsPage: View {
 
     private var refreshCadenceSelection: Binding<String> {
         Binding(
-            get: { model.refreshCadence.rawValue },
+            get: { model.refreshCadence.displayName },
             set: { value in
-                if let cadence = PromptMeterRefreshCadence(rawValue: value) {
+                if let cadence = PromptMeterRefreshCadence.from(displayName: value) {
                     model.refreshCadence = cadence
+                }
+            }
+        )
+    }
+
+    private var languageSelection: Binding<String> {
+        Binding(
+            get: { model.language.displayName },
+            set: { value in
+                if let language = PromptMeterLanguage.from(displayName: value) {
+                    model.language = language
                 }
             }
         )
@@ -77,37 +97,37 @@ struct DisplaySettingsPage: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            SettingsCard(title: "Menu Bar") {
+            SettingsCard(title: L10n.tr(.settingsDisplayMenuBarCard)) {
                 SettingPickerRow(
-                    title: "Usage value",
-                    detail: "Choose whether bars show remaining quota or consumed quota.",
+                    title: L10n.tr(.settingsDisplayUsageValueTitle),
+                    detail: L10n.tr(.settingsDisplayUsageValueDetail),
                     selection: usageBasisSelection,
-                    options: PromptMeterUsageBasis.allCases.map(\.rawValue)
+                    options: PromptMeterUsageBasis.allCases.map(\.displayName)
                 )
 
                 SettingDivider()
 
                 SettingPickerRow(
-                    title: "Reset format",
-                    detail: "Show reset as a clean clock value or a countdown.",
+                    title: L10n.tr(.settingsDisplayResetFormatTitle),
+                    detail: L10n.tr(.settingsDisplayResetFormatDetail),
                     selection: resetStyleSelection,
-                    options: PromptMeterResetStyle.allCases.map(\.rawValue)
+                    options: PromptMeterResetStyle.allCases.map(\.displayName)
                 )
             }
 
-            SettingsCard(title: "Popover") {
-                SettingInfoRow(title: "Layout", value: "Aligned compact rows")
+            SettingsCard(title: L10n.tr(.settingsDisplayPopoverCard)) {
+                SettingInfoRow(title: L10n.tr(.settingsDisplayLayoutTitle), value: L10n.tr(.settingsDisplayLayoutValue))
                 SettingDivider()
-                SettingInfoRow(title: "Menu bar", value: "Icon only")
+                SettingInfoRow(title: L10n.tr(.settingsDisplayMenuBarRowTitle), value: L10n.tr(.settingsDisplayMenuBarRowValue))
             }
         }
     }
 
     private var usageBasisSelection: Binding<String> {
         Binding(
-            get: { model.usageBasis.rawValue },
+            get: { model.usageBasis.displayName },
             set: { value in
-                if let basis = PromptMeterUsageBasis(rawValue: value) {
+                if let basis = PromptMeterUsageBasis.from(displayName: value) {
                     model.usageBasis = basis
                 }
             }
@@ -116,9 +136,9 @@ struct DisplaySettingsPage: View {
 
     private var resetStyleSelection: Binding<String> {
         Binding(
-            get: { model.resetStyle.rawValue },
+            get: { model.resetStyle.displayName },
             set: { value in
-                if let style = PromptMeterResetStyle(rawValue: value) {
+                if let style = PromptMeterResetStyle.from(displayName: value) {
                     model.resetStyle = style
                 }
             }
@@ -131,20 +151,20 @@ struct AdvancedSettingsPage: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            SettingsCard(title: "Privacy") {
+            SettingsCard(title: L10n.tr(.settingsAdvancedPrivacyCard)) {
                 SettingToggleRow(
-                    title: "Hide personal information",
-                    detail: "Obscure account emails in settings.",
+                    title: L10n.tr(.settingsAdvancedHidePersonalInformationTitle),
+                    detail: L10n.tr(.settingsAdvancedHidePersonalInformationDetail),
                     isOn: $model.hidePersonalInformation
                 )
             }
 
-            SettingsCard(title: "Tools") {
+            SettingsCard(title: L10n.tr(.settingsAdvancedToolsCard)) {
                 HStack(alignment: .center, spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("Provider CLIs")
+                        Text(.settingsAdvancedProviderCLIsTitle)
                             .settingTitle()
-                        Text("PromptMeter reads usage through local provider CLIs.")
+                        Text(.settingsAdvancedProviderCLIsDetail)
                             .settingDetail()
                     }
 
@@ -167,10 +187,10 @@ struct AdvancedSettingsPage: View {
                 }
             }
 
-            SettingsCard(title: "Diagnostics") {
+            SettingsCard(title: L10n.tr(.settingsAdvancedDiagnosticsCard)) {
                 SettingToggleRow(
-                    title: "Debug mode",
-                    detail: "Expose provider CLI paths, raw plans, and limit identifiers.",
+                    title: L10n.tr(.settingsAdvancedDebugModeTitle),
+                    detail: L10n.tr(.settingsAdvancedDebugModeDetail),
                     isOn: $model.debugMode
                 )
             }
@@ -200,11 +220,11 @@ struct CodexProviderSettingsCard: View {
     private var installAction: ProviderInstallAction? {
         if case .missingCLI = model.codexState {
             return ProviderInstallAction(
-                title: "Local CLI required",
-                detail: "Install \(ProviderIconKind.codex.displayName) CLI with npm or Homebrew, then run \(ProviderIconKind.codex.loginCommand).",
+                title: L10n.tr(.providerInstallActionTitle),
+                detail: L10n.tr(.providerInstallActionDetailCodex),
                 command: model.codexInstallCommand,
-                primaryButtonTitle: "Guide",
-                commandTitle: "Install command",
+                primaryButtonTitle: L10n.tr(.providerInstallGuideButton),
+                commandTitle: L10n.tr(.providerInstallCommandTitle),
                 primaryAction: SettingsLinks.openCodexInstallGuide,
                 copyCommandAction: model.copyCodexInstallCommand
             )
@@ -222,7 +242,7 @@ struct CodexProviderSettingsCard: View {
     private var loginAction: ProviderCommandAction? {
         if case .needsLogin = model.codexState {
             return ProviderCommandAction(
-                title: "Login command",
+                title: L10n.tr(.providerLoginCommandTitle),
                 command: model.codexLoginCommand,
                 copyCommandAction: model.copyCodexLoginCommand
             )
@@ -264,11 +284,11 @@ struct ClaudeProviderSettingsCard: View {
     private var installAction: ProviderInstallAction? {
         if case .missingCLI = model.claudeState {
             return ProviderInstallAction(
-                title: "Local CLI required",
-                detail: "Install \(ProviderIconKind.claude.displayName), then sign in with your Claude account.",
+                title: L10n.tr(.providerInstallActionTitle),
+                detail: L10n.tr(.providerInstallActionDetailClaude),
                 command: model.claudeInstallCommand,
-                primaryButtonTitle: "Guide",
-                commandTitle: "Install command",
+                primaryButtonTitle: L10n.tr(.providerInstallGuideButton),
+                commandTitle: L10n.tr(.providerInstallCommandTitle),
                 primaryAction: SettingsLinks.openClaudeInstallGuide,
                 copyCommandAction: model.copyClaudeInstallCommand
             )
@@ -287,7 +307,7 @@ struct ClaudeProviderSettingsCard: View {
     private var loginAction: ProviderCommandAction? {
         if case .needsLogin = model.claudeState {
             return ProviderCommandAction(
-                title: "Login command",
+                title: L10n.tr(.providerLoginCommandTitle),
                 command: model.claudeLoginCommand,
                 copyCommandAction: model.copyClaudeLoginCommand
             )
@@ -329,11 +349,11 @@ struct GeminiProviderSettingsCard: View {
     private var installAction: ProviderInstallAction? {
         if case .missingCLI = model.geminiState {
             return ProviderInstallAction(
-                title: "Local CLI required",
-                detail: "Install \(ProviderIconKind.gemini.displayName), then run \(ProviderIconKind.gemini.loginCommand) to sign in.",
+                title: L10n.tr(.providerInstallActionTitle),
+                detail: L10n.format(.providerInstallActionDetailGeminiFormat, ProviderIconKind.gemini.loginCommand),
                 command: model.geminiInstallCommand,
-                primaryButtonTitle: "Guide",
-                commandTitle: "Install command",
+                primaryButtonTitle: L10n.tr(.providerInstallGuideButton),
+                commandTitle: L10n.tr(.providerInstallCommandTitle),
                 primaryAction: SettingsLinks.openGeminiInstallGuide,
                 copyCommandAction: model.copyGeminiInstallCommand
             )
@@ -352,7 +372,7 @@ struct GeminiProviderSettingsCard: View {
     private var loginAction: ProviderCommandAction? {
         if case .needsLogin = model.geminiState {
             return ProviderCommandAction(
-                title: "Login command",
+                title: L10n.tr(.providerLoginCommandTitle),
                 command: model.geminiLoginCommand,
                 copyCommandAction: model.copyGeminiLoginCommand
             )
@@ -420,19 +440,19 @@ struct AboutSettingsPage: View {
             .frame(width: 76, height: 76)
 
             VStack(spacing: 4) {
-                Text("PromptMeter")
+                Text(verbatim: "PromptMeter")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(SettingsPalette.primaryText)
-                Text("Version 0.1.0")
+                Text(verbatim: L10n.format(.settingsAboutVersionLabelFormat, "0.1.0"))
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(SettingsPalette.secondaryText)
-                Text("A quiet menu bar meter for prompt usage.")
+                Text(.settingsAboutTagline)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(SettingsPalette.mutedText)
             }
 
             HStack(spacing: 10) {
-                AboutLinkButton(icon: "chevron.left.forwardslash.chevron.right", title: "GitHub") {
+                AboutLinkButton(icon: "chevron.left.forwardslash.chevron.right", title: L10n.tr(.settingsAboutGitHubButton)) {
                     SettingsLinks.openGitHub()
                 }
                 AboutLinkButton(icon: "globe", title: ProviderIconKind.codex.displayName) {
@@ -448,7 +468,7 @@ struct AboutSettingsPage: View {
 
             Spacer()
 
-            Text("© 2026 PromptMeter")
+            Text(verbatim: L10n.format(.settingsAboutCopyrightFormat, "2026"))
                 .font(.system(size: 10, weight: .medium))
                 .foregroundStyle(SettingsPalette.mutedText)
         }

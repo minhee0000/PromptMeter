@@ -77,32 +77,44 @@ enum ProviderAccent {
 
 @MainActor
 enum ProviderUsageMapper {
-    static let checkingSnapshots = [
+    private static func checkingPlaceholder(provider: ProviderIconKind) -> ProviderUsageSnapshot {
         providerSnapshot(
-            provider: .codex,
-            plan: "Checking",
+            provider: provider,
+            plan: L10n.tr(.statusChecking),
             detail: nil,
-            primary: .empty(title: ProviderQuotaWindowKind.session.title),
-            secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-            isPlaceholder: true
-        ),
-        providerSnapshot(
-            provider: .claude,
-            plan: "Checking",
-            detail: nil,
-            primary: .empty(title: ProviderQuotaWindowKind.session.title),
-            secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-            isPlaceholder: true
-        ),
-        providerSnapshot(
-            provider: .gemini,
-            plan: "Checking",
-            detail: nil,
-            primary: .empty(title: ProviderQuotaWindowKind.session.title),
-            secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
+            primary: .empty(title: ProviderQuotaWindowKind.session.localizedTitle),
+            secondary: .empty(title: ProviderQuotaWindowKind.weekly.localizedTitle),
             isPlaceholder: true
         )
-    ]
+    }
+
+    private static func loginRequiredPlaceholder(
+        provider: ProviderIconKind,
+        detail: String
+    ) -> ProviderUsageSnapshot {
+        providerSnapshot(
+            provider: provider,
+            plan: L10n.tr(.providerLoginRequiredPlan),
+            detail: detail,
+            primary: .empty(title: ProviderQuotaWindowKind.session.localizedTitle),
+            secondary: .empty(title: ProviderQuotaWindowKind.weekly.localizedTitle),
+            extraMetrics: []
+        )
+    }
+
+    private static func unavailablePlaceholder(
+        provider: ProviderIconKind,
+        detail: String
+    ) -> ProviderUsageSnapshot {
+        providerSnapshot(
+            provider: provider,
+            plan: L10n.tr(.providerUnavailablePlan),
+            detail: detail,
+            primary: .empty(title: ProviderQuotaWindowKind.session.localizedTitle),
+            secondary: .empty(title: ProviderQuotaWindowKind.weekly.localizedTitle),
+            extraMetrics: []
+        )
+    }
 
     static func menuProviders(
         codex: CodexProviderState,
@@ -126,36 +138,25 @@ enum ProviderUsageMapper {
     ) -> ProviderUsageSnapshot? {
         switch state {
         case .checking:
-            return checkingSnapshots[0]
+            return checkingPlaceholder(provider: .codex)
         case .connected(let snapshot):
             return providerSnapshot(
                 provider: .codex,
                 plan: snapshot.planName,
                 detail: nil,
-                primary: codexMetric(title: ProviderQuotaWindowKind.session.title, window: snapshot.primary, usageBasis: usageBasis, resetStyle: resetStyle),
-                secondary: codexMetric(title: ProviderQuotaWindowKind.weekly.title, window: snapshot.secondary, usageBasis: usageBasis, resetStyle: resetStyle),
+                primary: codexMetric(title: ProviderQuotaWindowKind.session.localizedTitle, window: snapshot.primary, usageBasis: usageBasis, resetStyle: resetStyle),
+                secondary: codexMetric(title: ProviderQuotaWindowKind.weekly.localizedTitle, window: snapshot.secondary, usageBasis: usageBasis, resetStyle: resetStyle),
                 extraMetrics: []
             )
         case .missingCLI:
             return nil
         case .needsLogin:
-            return providerSnapshot(
+            return loginRequiredPlaceholder(
                 provider: .codex,
-                plan: "Login required",
-                detail: "Run \(ProviderIconKind.codex.loginCommand) from Terminal.",
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
+                detail: L10n.format(.providerLoginRequiredCardDetailFormat, ProviderIconKind.codex.loginCommand)
             )
         case .unavailable(let message):
-            return providerSnapshot(
-                provider: .codex,
-                plan: "Unavailable",
-                detail: message,
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
-            )
+            return unavailablePlaceholder(provider: .codex, detail: message)
         }
     }
 
@@ -166,12 +167,12 @@ enum ProviderUsageMapper {
     ) -> ProviderUsageSnapshot? {
         switch state {
         case .checking:
-            return checkingSnapshots[2]
+            return checkingPlaceholder(provider: .gemini)
         case .connected(let snapshot):
             return providerSnapshot(
                 provider: .gemini,
                 plan: snapshot.planName,
-                detail: snapshot.hasRateLimits ? nil : "Gemini stats did not include quota percentages.",
+                detail: snapshot.hasRateLimits ? nil : L10n.tr(.providerGeminiNoQuotaPercentages),
                 primary: geminiMetric(title: snapshot.primaryTitle, window: snapshot.primary, usageBasis: usageBasis, resetStyle: resetStyle),
                 secondary: geminiMetric(title: snapshot.secondaryTitle, window: snapshot.secondary, usageBasis: usageBasis, resetStyle: resetStyle),
                 extraMetrics: snapshot.extraWindows.map {
@@ -181,23 +182,12 @@ enum ProviderUsageMapper {
         case .missingCLI:
             return nil
         case .needsLogin:
-            return providerSnapshot(
+            return loginRequiredPlaceholder(
                 provider: .gemini,
-                plan: "Login required",
-                detail: "Run \(ProviderIconKind.gemini.loginCommand) and sign in with Google.",
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
+                detail: L10n.format(.providerLoginRequiredCardDetailGeminiFormat, ProviderIconKind.gemini.loginCommand)
             )
         case .unavailable(let message):
-            return providerSnapshot(
-                provider: .gemini,
-                plan: "Unavailable",
-                detail: message,
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
-            )
+            return unavailablePlaceholder(provider: .gemini, detail: message)
         }
     }
 
@@ -208,14 +198,14 @@ enum ProviderUsageMapper {
     ) -> ProviderUsageSnapshot? {
         switch state {
         case .checking:
-            return checkingSnapshots[1]
+            return checkingPlaceholder(provider: .claude)
         case .connected(let snapshot):
             return providerSnapshot(
                 provider: .claude,
                 plan: snapshot.subscriptionName,
-                detail: snapshot.hasRateLimits ? nil : "Claude OAuth usage did not include rate limits.",
-                primary: claudeMetric(title: ProviderQuotaWindowKind.session.title, window: snapshot.session, usageBasis: usageBasis, resetStyle: resetStyle),
-                secondary: claudeMetric(title: ProviderQuotaWindowKind.weekly.title, window: snapshot.weekly, usageBasis: usageBasis, resetStyle: resetStyle),
+                detail: snapshot.hasRateLimits ? nil : L10n.tr(.providerClaudeNoRateLimits),
+                primary: claudeMetric(title: ProviderQuotaWindowKind.session.localizedTitle, window: snapshot.session, usageBasis: usageBasis, resetStyle: resetStyle),
+                secondary: claudeMetric(title: ProviderQuotaWindowKind.weekly.localizedTitle, window: snapshot.weekly, usageBasis: usageBasis, resetStyle: resetStyle),
                 extraMetrics: snapshot.extraWindows.map {
                     claudeMetric(title: $0.title, window: $0.window, usageBasis: usageBasis, resetStyle: resetStyle)
                 }
@@ -223,23 +213,12 @@ enum ProviderUsageMapper {
         case .missingCLI:
             return nil
         case .needsLogin:
-            return providerSnapshot(
+            return loginRequiredPlaceholder(
                 provider: .claude,
-                plan: "Login required",
-                detail: "Run \(ProviderIconKind.claude.loginCommand) from Terminal.",
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
+                detail: L10n.format(.providerLoginRequiredCardDetailFormat, ProviderIconKind.claude.loginCommand)
             )
         case .unavailable(let message):
-            return providerSnapshot(
-                provider: .claude,
-                plan: "Unavailable",
-                detail: message,
-                primary: .empty(title: ProviderQuotaWindowKind.session.title),
-                secondary: .empty(title: ProviderQuotaWindowKind.weekly.title),
-                extraMetrics: []
-            )
+            return unavailablePlaceholder(provider: .claude, detail: message)
         }
     }
 
@@ -379,7 +358,7 @@ enum ProviderUsageMapper {
     }
 
     private static func defaultWindowDuration(for title: String) -> TimeInterval? {
-        ProviderQuotaWindowKind(title: title)?.defaultDuration
+        ProviderQuotaWindowKind(displayTitle: title)?.defaultDuration
     }
 
     private static func paceMarker(
@@ -423,22 +402,24 @@ enum ProviderUsageMapper {
     }
 
     private static func formatReset(_ date: Date?, style: PromptMeterResetStyle) -> String {
-        guard let date else { return "--" }
+        guard let date else { return L10n.tr(.commonDash) }
 
         if style == .countdown {
             return formatCountdown(to: date)
         }
 
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
+        let timeFormatter = DateFormatter()
+        timeFormatter.locale = Locale(identifier: "en_US_POSIX")
+        timeFormatter.dateFormat = "HH:mm"
 
         if Calendar.current.isDateInToday(date) {
-            formatter.dateFormat = "'Today' HH:mm"
-        } else {
-            formatter.dateFormat = "EEE HH:mm"
+            return L10n.format(.timeTodayFormat, timeFormatter.string(from: date))
         }
 
-        return formatter.string(from: date)
+        let weekdayFormatter = DateFormatter()
+        weekdayFormatter.locale = LocalizationManager.shared.resolvedLocale
+        weekdayFormatter.dateFormat = "EEE HH:mm"
+        return weekdayFormatter.string(from: date)
     }
 
     private static func formatCountdown(to date: Date) -> String {
@@ -448,13 +429,13 @@ enum ProviderUsageMapper {
         let minutes = (seconds % 3_600) / 60
 
         if days > 0 {
-            return "\(days)d \(hours)h"
+            return L10n.format(.unitDayHourShortFormat, days, hours)
         }
 
         if hours > 0 {
-            return "\(hours)h \(minutes)m"
+            return L10n.format(.unitHourMinuteShortFormat, hours, minutes)
         }
 
-        return "\(max(1, minutes))m"
+        return L10n.format(.unitMinuteShortFormat, max(1, minutes))
     }
 }

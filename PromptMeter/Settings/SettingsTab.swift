@@ -21,4 +21,20 @@ enum SettingsTab: String, CaseIterable, Identifiable {
             return "info.circle"
         }
     }
+
+    @MainActor
+    var displayName: String {
+        switch self {
+        case .general:
+            return L10n.tr(.settingsTabsGeneral)
+        case .providers:
+            return L10n.tr(.settingsTabsProviders)
+        case .display:
+            return L10n.tr(.settingsTabsDisplay)
+        case .advanced:
+            return L10n.tr(.settingsTabsAdvanced)
+        case .about:
+            return L10n.tr(.settingsTabsAbout)
+        }
+    }
 }
